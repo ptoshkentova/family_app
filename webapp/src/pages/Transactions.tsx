@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api, type Transaction, type TransactionPatch } from '../api'
 import { categoryColor, dayLabel, money, splitCategory, tashkentDate, timeLabel } from '../format'
-import { useBudget } from '../Layout'
+import { useBudget } from '../budget-context'
 import { confirmDialog, haptic } from '../telegram'
 
 export function Transactions() {

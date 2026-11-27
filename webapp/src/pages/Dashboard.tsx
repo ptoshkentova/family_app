@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from '../api'
 import { DailyBars, Donut } from '../components/Charts'
 import { categoryColor, money, shortMoney, splitCategory } from '../format'
-import { useBudget } from '../Layout'
+import { useBudget } from '../budget-context'
 
 export function Dashboard() {
   const { budget, period, categories } = useBudget()

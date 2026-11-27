@@ -68,6 +68,17 @@ Ma'lumotlar bazasi testlari uchun:
 TEST_DATABASE_URL="postgres://localhost:5433/budget_test?sslmode=disable" go test ./...
 ```
 
+## CI (GitHub Actions)
+
+[.github/workflows/ci.yml](.github/workflows/ci.yml) har bir push va pull request'da ishlaydi:
+
+- **Go:** `gofmt`, `go mod tidy`, `go vet`, PostgreSQL bilan `go test -race`, `govulncheck`, build
+- **Mini App:** `bun install --frozen-lockfile`, `oxlint --deny-warnings`, `tsrs` bilan tur tekshiruvi va build,
+  hamda zaxira sifatida rasmiy `tsc` tekshiruvi (`tsrs` hali beta)
+
+Tur tekshiruvi [tsrs](https://github.com/oxc-project/tsrs) (TypeScript 7 checker'ning Rust porti) bilan bajariladi:
+`bun run typecheck`. Rasmiy kompilyator bilan solishtirish uchun: `bun run typecheck:tsc`.
+
 ## Tuzilishi
 
 | Papka | Vazifasi |

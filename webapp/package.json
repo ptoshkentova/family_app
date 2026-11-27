@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsrs -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsrs -b",
+    "typecheck:tsc": "tsc -b"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.108.4",
@@ -21,7 +23,9 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.3.0",
     "oxlint": "^1.94.0",
+    "tsrs": "7.1.0-beta.tsrs5",
     "typescript": "~7.0.2",
     "vite": "^8.4.0"
-  }
+  },
+  "packageManager": "bun@1.4.5"
 }

@@ -11,32 +11,28 @@ export function Donut({ slices, center }: { slices: Slice[]; center: string }) {
   const total = slices.reduce((s, x) => s + x.value, 0)
   const r = 40
   const c = 2 * Math.PI * r
-  let offset = 0
+  const lengths = slices.map((s) => (total > 0 ? (s.value / total) * c : 0))
+  const offsets = lengths.map((_, i) => lengths.slice(0, i).reduce((a, b) => a + b, 0))
   return (
     <svg viewBox="0 0 100 100" className="donut" role="img" aria-label="Xarajatlar taqsimoti">
       <circle cx="50" cy="50" r={r} fill="none" stroke="var(--track)" strokeWidth="14" />
       {total > 0 &&
-        slices.map((s) => {
-          const len = (s.value / total) * c
-          const el = (
-            <circle
-              key={s.label}
-              cx="50"
-              cy="50"
-              r={r}
-              fill="none"
-              stroke={s.color}
-              strokeWidth="14"
-              strokeDasharray={`${Math.max(len - 0.6, 0)} ${c}`}
-              strokeDashoffset={-offset}
-              transform="rotate(-90 50 50)"
-            >
-              <title>{s.label}</title>
-            </circle>
-          )
-          offset += len
-          return el
-        })}
+        slices.map((s, i) => (
+          <circle
+            key={s.label}
+            cx="50"
+            cy="50"
+            r={r}
+            fill="none"
+            stroke={s.color}
+            strokeWidth="14"
+            strokeDasharray={`${Math.max(lengths[i] - 0.6, 0)} ${c}`}
+            strokeDashoffset={-offsets[i]}
+            transform="rotate(-90 50 50)"
+          >
+            <title>{s.label}</title>
+          </circle>
+        ))}
       <text x="50" y="47" textAnchor="middle" className="donut-label">
         Jami
       </text>

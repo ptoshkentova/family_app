@@ -1,22 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, Outlet, useNavigate, useSearch } from '@tanstack/react-router'
-import { createContext, useContext, useEffect } from 'react'
-import { api, type Budget, type Period } from './api'
+import { useEffect } from 'react'
+import { api, type Period } from './api'
+import { BudgetContext } from './budget-context'
 import { haptic } from './telegram'
-
-interface BudgetCtx {
-  budget: Budget
-  period: Period
-  categories: string[]
-}
-
-const Ctx = createContext<BudgetCtx | null>(null)
-
-export function useBudget(): BudgetCtx {
-  const v = useContext(Ctx)
-  if (!v) throw new Error('useBudget outside Layout')
-  return v
-}
 
 const PERIODS: { value: Period; label: string }[] = [
   { value: 'day', label: 'Bugun' },
@@ -65,7 +52,7 @@ export function Layout() {
   }
 
   return (
-    <Ctx.Provider value={{ budget, period: search.period, categories: categories.data ?? [] }}>
+    <BudgetContext.Provider value={{ budget, period: search.period, categories: categories.data ?? [] }}>
       <div className="app">
         <header className="header">
           {budgets.length > 1 ? (
@@ -111,6 +98,6 @@ export function Layout() {
           </Link>
         </nav>
       </div>
-    </Ctx.Provider>
+    </BudgetContext.Provider>
   )
 }
