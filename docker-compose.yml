@@ -1,0 +1,15 @@
+# Optional: run PostgreSQL in Docker instead of a local install.
+# Matches DATABASE_URL=postgres://budget:budget@localhost:5433/budget?sslmode=disable
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: budget
+      POSTGRES_PASSWORD: budget
+      POSTGRES_DB: budget
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:

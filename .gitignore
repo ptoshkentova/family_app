@@ -1,0 +1,5 @@
+.env
+.DS_Store
+/bin/
+webapp/node_modules/
+webapp/dist/
