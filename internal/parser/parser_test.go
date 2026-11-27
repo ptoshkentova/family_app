@@ -23,6 +23,10 @@ func TestAmountFormats(t *testing.T) {
 		"5ming non":            5_000,
 		"go'sht 2 kg 180 ming": 180_000,
 		"Kurtka 1 million":     1_000_000,
+		"taksi 20,000":         20_000,    // Whisper writes thousands with commas
+		"kurtka 1.500.000":     1_500_000, // dots as thousands separators
+		"benzin 1,25 mln":      1_250_000, // with a unit, the comma is a decimal
+		"non 2.5k":             2_500,
 	}
 	for text, want := range cases {
 		if got := one(t, text).Amount; got != want {
@@ -74,6 +78,29 @@ func TestIncome(t *testing.T) {
 	}
 	if one(t, "non 5 ming").IsIncome {
 		t.Error("non is not income")
+	}
+
+	// Money coming in, described with verbs.
+	for _, text := range []string{
+		"do'stim qarzini menga berdi 500 ming", // real case: a friend repaid a loan
+		"akam qarzini qaytardi 300 ming",
+		"kartaga 2 mln tushdi",
+		"eski telefonni sotdim 1.5 mln",
+		"onam berdi 100 ming",
+	} {
+		if it := one(t, text); !it.IsIncome || it.Category != IncomeCategory {
+			t.Errorf("%q should be income, got %+v", text, it)
+		}
+	}
+	// Money going out: first-person "berdim" (I gave) and lending.
+	for text, cat := range map[string]string{
+		"onamga 100 ming berdim":         OtherCategory,
+		"do'stimga qarz berdim 300 ming": "💳 Qarz va kredit",
+		"kredit to'ladim 1 mln":          "💳 Qarz va kredit",
+	} {
+		if it := one(t, text); it.IsIncome || it.Category != cat {
+			t.Errorf("%q should be an expense in %q, got %+v", text, cat, it)
+		}
 	}
 }
 

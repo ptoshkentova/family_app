@@ -25,6 +25,7 @@ Xarajatni oddiy yozing:
 • <code>non 5 ming</code>
 • <code>taksi 20k, bozor 150 000, dori 45 ming</code>
 • <code>+oylik 6 mln</code> — daromad (oldiga + qo'ying)
+• 🎤 yoki ovozli xabar yuboring: <i>"nonga besh ming, taksiga yigirma ming"</i>
 
 <b>Buyruqlar:</b>
 /bugun — bugungi hisobot
@@ -35,14 +36,21 @@ Xarajatni oddiy yozing:
 
 👨‍👩‍👧 <b>Oilaviy byudjet:</b> botni oila guruhiga qo'shing — hamma yozgan xarajatlar bitta hisobotga tushadi.`
 
+// Transcriber turns an audio file into text. Nil disables voice messages.
+type Transcriber interface {
+	Transcribe(ctx context.Context, audioPath string) (string, error)
+}
+
 type Bot struct {
 	api       *tg.Bot
 	store     *store.Store
 	webAppURL string
+	stt       Transcriber
+	voiceSem  chan struct{} // limits concurrent transcriptions (they are CPU/GPU heavy)
 }
 
-func New(token string, st *store.Store, webAppURL string) (*Bot, error) {
-	b := &Bot{store: st, webAppURL: webAppURL}
+func New(token string, st *store.Store, webAppURL string, stt Transcriber) (*Bot, error) {
+	b := &Bot{store: st, webAppURL: webAppURL, stt: stt, voiceSem: make(chan struct{}, 1)}
 	api, err := tg.New(token, tg.WithDefaultHandler(b.handle))
 	if err != nil {
 		return nil, err
@@ -95,6 +103,8 @@ func (b *Bot) handle(ctx context.Context, _ *tg.Bot, u *models.Update) {
 		b.onCallback(ctx, u.CallbackQuery)
 	case u.Message != nil && u.Message.Text != "" && u.Message.From != nil:
 		b.onMessage(ctx, u.Message)
+	case u.Message != nil && u.Message.Voice != nil && u.Message.From != nil:
+		b.onVoice(ctx, u.Message)
 	}
 }
 
@@ -174,6 +184,11 @@ func (b *Bot) onExpense(ctx context.Context, m *models.Message) {
 		}
 		return
 	}
+	b.recordItems(ctx, m, items, "")
+}
+
+// recordItems saves parsed items and replies with a summary, an optional footer and an undo button.
+func (b *Bot) recordItems(ctx context.Context, m *models.Message, items []parser.Item, footer string) {
 	ids, err := b.store.AddItems(ctx, m.Chat.ID, m.From.ID, m.From.FirstName, items)
 	if !b.check(ctx, m, err) {
 		return
@@ -196,6 +211,9 @@ func (b *Bot) onExpense(ctx context.Context, m *models.Message) {
 			}
 		}
 		fmt.Fprintf(&sb, "\n\nBugun jami: %s", report.Money(spent))
+	}
+	if footer != "" {
+		sb.WriteString("\n\n" + footer)
 	}
 
 	idStrs := make([]string, len(ids))

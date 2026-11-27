@@ -47,6 +47,21 @@ cloudflared tunnel --url http://localhost:8080
 go run ./cmd/server
 ```
 
+## Ovozli xabarlar
+
+Ovozli xabarlar kompyuterning o'zida [whisper.cpp](https://github.com/ggml-org/whisper.cpp) orqali
+matnga aylantiriladi (audio hech qayerga yuborilmaydi). O'zbek tiliga moslangan
+[univoice-stt-uz](https://huggingface.co/ZOKHID/univoice-stt-uz-ggml) modeli ishlatiladi (Apache-2.0):
+
+```bash
+brew install whisper-cpp ffmpeg
+mkdir -p models && curl -L -o models/ggml-univoice-stt-uz-q5_0.bin \
+  https://huggingface.co/ZOKHID/univoice-stt-uz-ggml/resolve/main/ggml-univoice-stt-uz-q5_0.bin
+```
+
+Model topilmasa, bot ishlayveradi, faqat ovozli xabarlar o'chiriladi. Guruhlarda pul haqida
+bo'lmagan ovozli xabarlar indamay e'tiborsiz qoldiriladi.
+
 ## Mini App'ni brauzerda ishlab chiqish
 
 ```bash
