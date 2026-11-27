@@ -237,6 +237,15 @@ func (s *Store) BudgetsForUser(ctx context.Context, userID int64) ([]Budget, err
 	})
 }
 
+// PrivateChatIDs returns the chat ids of all personal (private-chat) budgets.
+func (s *Store) PrivateChatIDs(ctx context.Context) ([]int64, error) {
+	rows, err := s.db.Query(ctx, `SELECT chat_id FROM budgets WHERE NOT is_group`)
+	if err != nil {
+		return nil, err
+	}
+	return pgx.CollectRows(rows, pgx.RowTo[int64])
+}
+
 func (s *Store) IsMember(ctx context.Context, chatID, userID int64) (bool, error) {
 	var ok bool
 	err := s.db.QueryRow(ctx, `SELECT EXISTS (SELECT 1 FROM members WHERE chat_id = $1 AND user_id = $2)`,

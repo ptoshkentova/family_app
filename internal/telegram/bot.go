@@ -65,14 +65,28 @@ func (b *Bot) Run(ctx context.Context) {
 		slog.Warn("set commands", "err", err)
 	}
 	if b.webAppURL != "" {
-		_, err = b.api.SetChatMenuButton(ctx, &tg.SetChatMenuButtonParams{MenuButton: models.MenuButtonWebApp{
-			Type: models.MenuButtonTypeWebApp, Text: "📊 Hisobot", WebApp: models.WebAppInfo{URL: b.webAppURL},
-		}})
+		b.setMenuButton(ctx, nil) // default for new chats
+		// Telegram clients cache the menu button URL. Setting it per chat pushes an update to
+		// each client, so a changed WEBAPP_URL (e.g. a new dev tunnel) takes effect right away.
+		ids, err := b.store.PrivateChatIDs(ctx)
 		if err != nil {
-			slog.Warn("set menu button", "err", err)
+			slog.Warn("list private chats", "err", err)
+		}
+		for _, id := range ids {
+			b.setMenuButton(ctx, id)
 		}
 	}
 	b.api.Start(ctx)
+}
+
+// setMenuButton sets the Mini App menu button for one chat, or the bot default when chatID is nil.
+func (b *Bot) setMenuButton(ctx context.Context, chatID any) {
+	_, err := b.api.SetChatMenuButton(ctx, &tg.SetChatMenuButtonParams{ChatID: chatID, MenuButton: models.MenuButtonWebApp{
+		Type: models.MenuButtonTypeWebApp, Text: "📊 Hisobot", WebApp: models.WebAppInfo{URL: b.webAppURL},
+	}})
+	if err != nil {
+		slog.Warn("set menu button", "chat", chatID, "err", err)
+	}
 }
 
 func (b *Bot) handle(ctx context.Context, _ *tg.Bot, u *models.Update) {
