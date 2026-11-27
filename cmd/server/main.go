@@ -15,6 +15,7 @@ import (
 	"budgetbot/internal/api"
 	"budgetbot/internal/config"
 	"budgetbot/internal/store"
+	"budgetbot/internal/stt"
 	"budgetbot/internal/telegram"
 )
 
@@ -39,7 +40,16 @@ func run() error {
 	}
 	defer st.Close()
 
-	bot, err := telegram.New(cfg.BotToken, st, cfg.WebAppURL)
+	var transcriber telegram.Transcriber
+	whisper := stt.Whisper{WhisperBin: cfg.WhisperBin, FFmpegBin: cfg.FFmpegBin, Model: cfg.WhisperModel, Language: "uz"}
+	if err := whisper.Available(); err != nil {
+		slog.Warn("voice messages disabled", "reason", err)
+	} else {
+		transcriber = whisper
+		slog.Info("voice messages enabled", "model", cfg.WhisperModel)
+	}
+
+	bot, err := telegram.New(cfg.BotToken, st, cfg.WebAppURL, transcriber)
 	if err != nil {
 		return err
 	}
