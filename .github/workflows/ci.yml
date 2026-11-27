@@ -33,9 +33,9 @@ jobs:
     env:
       TEST_DATABASE_URL: postgres://budget:budget@localhost:5432/budget_test?sslmode=disable
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
 
@@ -70,7 +70,7 @@ jobs:
       run:
         working-directory: webapp
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -89,7 +89,7 @@ jobs:
       - name: Type-check (tsc, reference)
         run: bun run typecheck:tsc
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: webapp-dist
           path: webapp/dist
